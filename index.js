@@ -15,7 +15,7 @@ app.use(
     credentials: true,
   })
 );
-
+app.use(express.json());
 app.use(cookieParser());
 
 
@@ -39,6 +39,25 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+
+    // authorization
+    app.post('/jwt', async (req, res)=>{
+      const user = req.body;
+      console.log(user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'365d'})
+      console.log(token);
+      res
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: false
+      })
+      .send({success: true});
+    }
+    )
+
+
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
