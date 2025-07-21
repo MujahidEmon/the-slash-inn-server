@@ -21,8 +21,19 @@ app.use(cookieParser());
 
 // jwt middleware
 
-const verifyToken = () => {
-    
+const verifyToken = async (req, res , next ) => {
+    const token = req.cookies?.token;
+    if(!token){
+      return res.status(401).send({message: 'unauthorized'})
+    }
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+      if(err){
+        return res.status(401).send({message: 'unauthorized'})
+      }
+      req.user = decoded;
+    })
+    next();
 }
 
 const uri =
@@ -55,6 +66,12 @@ async function run() {
       .send({success: true});
     }
     )
+
+    app.get('/logout', (req, res) => {
+      const user = req.body;
+      res.clearCookie('token', {maxAge: 0})
+      .send({success: true})
+    })
 
 
 
